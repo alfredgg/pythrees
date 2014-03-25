@@ -57,64 +57,34 @@ def move_tiles (values, move):
 
 def _change_values (oldvalues, watch_cols, watch_rows, incr, incc):
     values = deepcopy(oldvalues)
-    changes = []
     for c in watch_cols:
         for r in watch_rows:
-            _drag_value(values, r, c, incr, incc, changes)
-            #_bring_values(values, r, c, incr, incc)
-    changes = [chg for chg in changes if chg[1] != ()]
+            if values[r][c] == 0:
+                _bring_values(values, r, c, incr, incc)
+            if values[r][c] == 0:
+                continue
+            v = _bring_values(values, r+incr, c+incc, incr, incc)
+            bringing_nothing = v == 0
+            if bringing_nothing:
+                continue
+            merge = v == values[r][c] 
+            if merge:
+                values[r+incr][c+incc] = 0
+                values [r][c] = v + 1
     return values
 
-def _bring_values(values, row, col, incr, incc, first=True):
-    currow = row + incr
-    curcol = col + incc
-    is_margin = currow == -1 or currow == len(values) or curcol == -1 or curcol == len(values[0])
-    should_drag =  not first and values[row][col] != 0 
-    if is_margin or should_drag:
-        return values[row][col]
-    value = _bring_values(values, currow, curcol, incr, incc, False)
-    curval = values[row][col]
-    dont_touch = value != curval and first
-    nothing_to_do = value == 0 or dont_touch
-    if nothing_to_do:
+def _bring_values (values, row, col, incr, incc):
+    is_margin = row <= -1 or row >= len(values) or col <= -1 or col >= len(values[0])
+    if is_margin:
         return 0
-    drag_more = first and curval == 0
-    merge = first and curval == value
-    values[currow][curcol] = 0
-    if drag_more:
-        values[row][col] = value
-        _bring_values(values, currow, curcol, incr, incc, False)
-    elif merge:
-        values[row][col] = value + 1
-        
-
-def _drag_value (values, row, col, incr, incc, changes, level=0):
-    currow = row + incr
-    curcol = col + incc
-    
-    is_margin = currow == -1 or currow == len(values) or curcol == -1 or curcol == len(values[0])
-    should_drag =  level != 0 and values[row][col] != 0
-    if is_margin or should_drag:
-        changes.append([(row, col), (), False])
+    theres_something = values[row][col] != 0
+    if theres_something:
         return values[row][col]
-    
-    value = _drag_value(values, currow, curcol, incr, incc, changes, level+1)
-    
-    nothing_to_do = value == 0
-    drag_more = values[row][col] == 0 and value != 0
-    merge_values = values[row][col] == value
-    
-    if nothing_to_do:
+    v = _bring_values(values, row+incr, col+incc, incr, incc)
+    bringing_nothing = v == 0
+    if bringing_nothing:
         return 0
-    elif drag_more:
-        values[row][col] = value
-        values[currow][curcol] = 0
-        changes[-1][1] = (row, col)
-        _drag_value(values, row, col, incr, incc, changes, level)
-    elif merge_values:
-        values[row][col] = value + 1
-        values[currow][curcol] = 0
-        changes[-1][1] = (row, col)
-        changes[-1][2] = True          
-    return values[row][col]
+    values[row][col] = v
+    values[row+incr][col+incc] = 0
+    return v
     
