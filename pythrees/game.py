@@ -70,19 +70,16 @@ class Labels (object):
             self.labels[value] = lbl
         return lbl
     
-class AnimationEngine (object):
-    def __init__(self):
-        pass
-
 def keypress (key, tiles):
+    changes = None
     if (key == K_UP):
-        tiles.values = pythrees.move_tiles(tiles.values, pythrees.UP_MOVEMENT)
+        tiles.values, changes = pythrees.move_tiles(tiles.values, pythrees.UP_MOVEMENT)
     elif (key == K_RIGHT):
-        tiles.values = pythrees.move_tiles(tiles.values, pythrees.RIGHT_MOVEMENT)
+        tiles.values, changes = pythrees.move_tiles(tiles.values, pythrees.RIGHT_MOVEMENT)
     elif (key == K_DOWN):
-        tiles.values = pythrees.move_tiles(tiles.values, pythrees.DOWN_MOVEMENT)
+        tiles.values, changes = pythrees.move_tiles(tiles.values, pythrees.DOWN_MOVEMENT)
     elif (key == K_LEFT):
-        tiles.values = pythrees.move_tiles(tiles.values, pythrees.LEFT_MOVEMENT)
+        tiles.values, changes = pythrees.move_tiles(tiles.values, pythrees.LEFT_MOVEMENT)
     else:
         return
     tiles.new_value()

@@ -57,34 +57,38 @@ def move_tiles (values, move):
 
 def _change_values (oldvalues, watch_cols, watch_rows, incr, incc):
     values = deepcopy(oldvalues)
+    changes = []
     for c in watch_cols:
         for r in watch_rows:
             if values[r][c] == 0:
-                _bring_values(values, r, c, incr, incc)
+                _, pos_ini, pos_fin = _bring_values(values, r, c, incr, incc)
+                changes.append([pos_ini, pos_fin, False])
             if values[r][c] == 0:
                 continue
-            v = _bring_values(values, r+incr, c+incc, incr, incc)
+            v, pos_ini, pos_fin = _bring_values(values, r+incr, c+incc, incr, incc)
             bringing_nothing = v == 0
             if bringing_nothing:
                 continue
-            merge = v == values[r][c] 
+            merge = v == values[r][c]
+            changes.append([pos_ini, pos_fin, merge])
             if merge:
                 values[r+incr][c+incc] = 0
                 values [r][c] = v + 1
-    return values
+    changes = [c for c in changes if not c[0] is None]
+    return values, changes
 
 def _bring_values (values, row, col, incr, incc):
     is_margin = row <= -1 or row >= len(values) or col <= -1 or col >= len(values[0])
     if is_margin:
-        return 0
+        return 0, None, None
     theres_something = values[row][col] != 0
     if theres_something:
-        return values[row][col]
-    v = _bring_values(values, row+incr, col+incc, incr, incc)
+        return values[row][col], (row, col), (row, col)
+    v, pos_ini, _ = _bring_values(values, row+incr, col+incc, incr, incc)
     bringing_nothing = v == 0
     if bringing_nothing:
-        return 0
+        return 0, None, None
     values[row][col] = v
     values[row+incr][col+incc] = 0
-    return v
+    return v, pos_ini, (row, col)
     
